@@ -10,11 +10,11 @@ We split the SMEsD into train, valid and test dataset according to the enterpris
 ## Code
 To reproduce the result in the paper, you can run
 
-    ` python train.py `
+    python train.py 
 
 If you want to reproduce pre-trained embedding, you can run
 
-    `python metapath2vec.py`
+    python metapath2vec.py
  
   noted that you should firstly substitute the `samply.py` in PyG with the modified version in this repository.
 
