@@ -1,0 +1,186 @@
+import torch
+from torch_geometric.nn import MetaPath2Vec
+
+import pandas as pd
+
+# To run this code, please subsitute the original code in PyG with "./sample.py"
+
+
+train_data=pd.read_pickle('./data/train_data.pkl')
+valid_data=pd.read_pickle('./data/validate_data.pkl')
+test_data=pd.read_pickle('./data/test_data.pkl')
+split_data_idx=pd.read_pickle('./data/split_data_idx.pkl')
+
+train_risk_data,train_company_attr,train_hete_graph,train_hyp_graph,train_label=train_data
+valid_risk_data,valid_company_attr,valid_hete_graph,valid_hyp_graph,valid_label=valid_data
+test_risk_data,test_company_attr,test_hete_graph,test_hyp_graph,test_label=test_data
+train_idx,valid_idx,test_idx=split_data_idx
+
+company_num=3976
+
+
+gh_group=[train_hete_graph,valid_hete_graph,test_hete_graph]
+eg_sum=[]
+eg_tp_sum=[]
+for gh in gh_group:
+    edge_index,edge_type,edge_weight=gh
+    eg_sum+=edge_index
+    eg_tp_sum+=edge_type
+eg_sum=torch.LongTensor(eg_sum).transpose(0,1)
+eg_tp_sum=torch.LongTensor(eg_tp_sum)
+
+
+eg_idx=[]
+eg_tp=[]
+for i in  range(12):
+    mask=(eg_tp_sum==i)
+    temp=eg_sum[:,mask].transpose(0,1).tolist()
+    tp=eg_tp_sum[mask].tolist()
+    st=set()
+    for ser,j in enumerate(temp):
+        st.add((j[0],j[1],tp[ser]))
+    st=list(st)
+    for f in st:
+        eg_idx+=[[f[0],f[1]]]
+        eg_tp+=[f[2]]
+eg_idx=torch.LongTensor(eg_idx).transpose(0,1)
+eg_tp=torch.LongTensor(eg_tp)
+
+
+hete_graph=[eg_idx,eg_tp]
+
+
+def edge_split(hete_graph):
+    edge_index_dict={}
+    edge_index,edge_type=hete_graph
+    for edge_tp in range(12):
+        if edge_tp==0:
+            cp=(edge_type == edge_tp) & (edge_index[0]<company_num) & (edge_index[1]>company_num)
+            edge_index_dict[('company', 'supervised', 'person')]=edge_index[:, cp]
+        if edge_tp==1:
+            pc=(edge_type == edge_tp) & (edge_index[0]>company_num) & (edge_index[1]<company_num)
+            edge_index_dict[('person', 'supervise', 'company')]=edge_index[:, pc]
+
+
+        if edge_tp==2:
+            cp=(edge_type == edge_tp) & (edge_index[0]<company_num) & (edge_index[1]>company_num)
+            edge_index_dict[('company', 'executed', 'person')]=edge_index[:, cp]
+        if edge_tp==3:
+            pc=(edge_type == edge_tp) & (edge_index[0]>company_num) & (edge_index[1]<company_num)
+            edge_index_dict[('person', 'execute', 'company')]=edge_index[:, pc]
+
+        if edge_tp==4:
+            cp=(edge_type == edge_tp) & (edge_index[0]<company_num) & (edge_index[1]>company_num)
+            edge_index_dict[('company', 'stakeholderd', 'person')]=edge_index[:, cp]
+        if edge_tp==5:
+            pc=(edge_type == edge_tp) & (edge_index[0]>company_num) & (edge_index[1]<company_num)
+            edge_index_dict[('person', 'stakeholder', 'company')]=edge_index[:, pc]
+
+        if edge_tp==6:
+            cc=(edge_type == edge_tp) & (edge_index[0]<company_num) & (edge_index[1]<company_num)
+            edge_index_dict[('company', 'invest_CC', 'company')]=edge_index[:, cc]
+            
+        if edge_tp==7:
+            cc=(edge_type == edge_tp) & (edge_index[0]<company_num) & (edge_index[1]<company_num)
+            edge_index_dict[('company', 'invested_CC', 'company')]=edge_index[:, cc]
+        if edge_tp==9:
+            cp=(edge_type == edge_tp) & (edge_index[0]<company_num) & (edge_index[1]>company_num)
+            edge_index_dict[('company', 'invested_CP', 'person')]=edge_index[:, cp]
+        if edge_tp==8:
+            cp=(edge_type == edge_tp) & (edge_index[0]>company_num) & (edge_index[1]<company_num)
+            edge_index_dict[('person', 'invest_CP', 'company')]=edge_index[:, cp]
+
+        if edge_tp==10:
+            cc=(edge_type == edge_tp) & (edge_index[0]<company_num) & (edge_index[1]<company_num)
+            edge_index_dict[('company', 'branch', 'company')]=edge_index[:, cc]
+        if edge_tp==11:
+            cc=(edge_type == edge_tp) & (edge_index[0]<company_num) & (edge_index[1]<company_num)
+            edge_index_dict[('company', 'branched', 'company')]=edge_index[:, cc]
+
+    for path in edge_index_dict:
+        new_edge_idx=edge_index_dict[path]
+        idx0=(new_edge_idx[0]>company_num)
+        idx1=(new_edge_idx[1]>company_num)
+        new_edge_idx[0][idx0]=new_edge_idx[0][idx0]-company_num
+        new_edge_idx[1][idx1]=new_edge_idx[1][idx1]-company_num
+        edge_index_dict[path]=new_edge_idx
+
+    return edge_index_dict
+
+
+metapath=[('company', 'supervised', 'person'), 
+('person', 'supervise', 'company'), 
+('company', 'executed', 'person'), 
+('person', 'execute', 'company'), 
+('company', 'stakeholderd', 'person'),
+ ('person', 'stakeholder', 'company'), 
+ ('company', 'invest_CC', 'company'),
+ ('company', 'invested_CC', 'company'),
+ ('company', 'invested_CP', 'person'), 
+('person', 'invest_CP', 'company'), 
+('company', 'branch', 'company'),
+ ('company', 'branched', 'company'),
+
+  ]
+
+edge_index_dict=edge_split(hete_graph)
+
+num_nodes_dict={'company':3977,'person':2406}
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+model = MetaPath2Vec(edge_index_dict, embedding_dim=32,
+                     metapath=metapath, walk_length=50, context_size=5,
+                     walks_per_node=5, num_negative_samples=5,num_nodes_dict=num_nodes_dict,
+                     sparse=True).to(device)
+
+loader = model.loader(batch_size=128, shuffle=True, num_workers=0)
+optimizer = torch.optim.SparseAdam(list(model.parameters()), lr=0.01)
+
+best_acc=0
+
+
+def train(epoch, log_steps=5, eval_steps=1):
+    model.train()
+    global best_acc
+
+    total_loss = 0
+    for i, (pos_rw, neg_rw) in enumerate(loader):
+        optimizer.zero_grad()
+        loss = model.loss(pos_rw.to(device), neg_rw.to(device))
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+        if (i + 1) % log_steps == 0:
+            print((f'Epoch: {epoch}, Step: {i + 1:05d}/{len(loader)}, '
+                   f'Loss: {total_loss / log_steps:.4f}'))
+            total_loss = 0
+
+        if (i + 1) % eval_steps == 0:
+            acc = test()
+            print((f'Epoch: {epoch}, Step: {i + 1:05d}/{len(loader)}, '
+                   f'Acc: {acc:.4f}'))
+            if acc>best_acc:
+                best_acc=acc
+                com_emb=model('company')[:-1,:].cpu().detach().numpy()
+                person_emb=model('person')[:-1,:].cpu().detach().numpy()
+                emb=[com_emb,person_emb]
+                pd.to_pickle(emb, './data/meta_emb.pkl')
+                print('emb has been saved!')
+
+
+@torch.no_grad()
+def test():
+    model.eval()
+
+    z_train=model('company')[train_idx]
+    z_valid=model('company')[valid_idx]
+
+    return model.test(z_train, torch.LongTensor(train_label) , z_valid, torch.LongTensor(valid_label),
+                      max_iter=150)
+
+for epoch in range(1, 20):
+    train(epoch)
+    acc = test()
+    print(f'Epoch: {epoch}, Accuracy: {acc:.4f}')
+
