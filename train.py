@@ -71,23 +71,23 @@ set_random_seed(14)
 criterion = torch.nn.CrossEntropyLoss()
 #load risk data
 ##load justification information:  dict-->{company_index:[[cause type, court type, result category, time(months),time_label],...] }
-# risk_data=pd.read_pickle()
+
 
 # ##load company attribute information: np.array()-->[[register_captial, paid_captial, set up time(months)]] ------------same for train/valid/test (only set up time are different)---not sure
-# company_attr=pd.read_pickle()
+
 
 # #load heterogeneous graph
 # ## graph: edge index:[sour,tar].T -->2xN; edge type: [,,...,] -->N; edge weight:[,,...,]-->N; noted that company and person index are in same sequence, company first, then person 
-# hete_graph=pd.read_pickle()
+
 
 # #load hyper graph
 # ##hyper graph: dict:{industry:{ind1:[...],ind2:[...],...},area:{area1:[...],area2:[...],...},qualify:{qua1:[...],qua2:[...],...}} ------------same for train/valid/test
-# hyp_graph=pd.read_pickle()
+
 
 
 # #load label
 # ##label: [conpany_index,laebl]    company_index:[idx1,idx2,...]   label:[1,0,1,...], both are np.array()
-# label=pd.read_pickle()
+
 
 ###justification dict
 total_company_num=3976
