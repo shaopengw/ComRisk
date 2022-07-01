@@ -176,13 +176,11 @@ def test():
         print('Best Test Acc: %.4f Best Test Pre: %.4f Best Test Recall: %.4f Best Test F1: %.4f Best Test ROC: %.4f' % (ac,pr,re,f,rc))
         print(sum(pred))
 
-up=0
-
 
 best_acc=0
 best_f1=0
-count=0
-patience=50
+
+
 for epoch in np.arange(args.n_epoch):
 
     st=time.time()
@@ -230,19 +228,15 @@ for epoch in np.arange(args.n_epoch):
         if ac > best_acc and f>best_f1:
             best_acc = ac
             best_f1=f
-            count=0
             torch.save(model, './model_save/%s.pkl'%(args.conv_name))
 
             print('UPDATE!!!')
-            up=1
+
 
         et = time.time()
         print(("Epoch: %d (%.1fs)  LR: %.5f Train Loss: %.2f  Valid Loss: %.2f  Valid Acc: %.4f Valid Pre: %.4f  Valid Recall: %.4f Valid F1: %.4f  Valid Roc: %.4f"  ) % \
               (epoch, (et - st), optimizer.param_groups[0]['lr'], np.average(train_losses), \
                loss.cpu().detach().tolist(), ac,pr,re,f,rc))
-        if up==1:
-            test()
-            up=0
 
         del res, loss
 
