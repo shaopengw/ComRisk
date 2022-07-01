@@ -7,6 +7,8 @@ The SMEsD consists of 3,976 SMEs and related persons in China from 2014 to 2021,
 
 We split the SMEsD into train, valid and test dataset according to the enterprise bankruptcy time, i.e., 2014-2018 for train dataset, 2019 for valid dataset and 2020-2021 for test dataset.
 
+For more information about the dataset, please refer to "SMEsD.md".
+
 ## Code
 To reproduce the result in the paper, you can run
 
