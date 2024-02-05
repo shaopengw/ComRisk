@@ -1,6 +1,5 @@
 # ComRisk
-This repository is for paper " Combining Enterprise Intra-Risk with Contagion Risk for Bankruptcy Prediction via Graph Neural
-Networks" [Paper](https://www.sciencedirect.com/science/article/abs/pii/S0020025523016675?dgcid=author)
+This repository is for paper "Combining intra-risk and contagion risk for enterprise bankruptcy prediction using graph neural networks" [Paper](https://www.sciencedirect.com/science/article/abs/pii/S0020025523016675?dgcid=author)
 
 ## Reference
 
