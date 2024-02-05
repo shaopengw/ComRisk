@@ -1,6 +1,6 @@
-# SMEsD (V1.0) (update in 2022-07-01)
+# SMEsD (V1.0) (update on 2024-02-05)
 ## Introduction
-The dataset is used in paper " Combining Enterprise Intra-Risk with Contagion Risk for Bankruptcy Prediction via Graph Neural Networks" [ArXiv](https://arxiv.org/abs/2202.03874)
+The dataset is used in paper "Combining intra-risk and contagion risk for enterprise bankruptcy prediction using graph neural networks" [Paper](https://www.sciencedirect.com/science/article/abs/pii/S0020025523016675?dgcid=author)
 
 The SMEsD consists of 3,976 SMEs and related persons in China from 2014 to 2021, which constitutes a multiplex enterprise knowledge graph. All enterprises are associated with their basic business information and lawsuit events spanning from 2000 to 2021. Specifically, the enterprise business information includes registered capital, paid-in capital and established time. Each lawsuit consists of the associated plaintiff, defendant, subjects, court level, result and timestamp.
 
@@ -121,11 +121,16 @@ If you have any questions about the dataset or the paper, feel free to contact m
 
 
 ## Citation
-If you use find this dataset useful, please cite it in your work as follow:
+If you find this dataset useful, please cite the following in your work:
 
-    @article{zhao2022fisrebp,
-    title={FisrEbp: Enterprise Bankruptcy Prediction via Fusing its Intra-risk and Spillover-Risk},
-    author={Zhao, Yu and Wei, Shaopeng and Guo, Yu and Yang, Qing and Kou, Gang},
-    journal={arXiv preprint arXiv:2202.03874},
-    year={2022}
-}
+    @article{wei2024combining,
+      title={Combining Intra-Risk and Contagion Risk for Enterprise Bankruptcy Prediction Using Graph Neural Networks},
+      author={Wei, Shaopeng and Lv, Jia and Guo, Yu and Yang, Qing and Chen, Xingyan and Zhao, Yu and Li, Qing and Zhuang, Fuzhen and          Kou, Gang},
+      journal={Information Sciences},
+      pages={120081},
+      year={2024},
+      issn = {0020-0255},
+      doi = {https://doi.org/10.1016/j.ins.2023.120081},
+      url = {https://www.sciencedirect.com/science/article/pii/S0020025523016675},
+      publisher={Elsevier}
+    }
